@@ -48,9 +48,56 @@ const createBook = async (req, res) => {
 };
 
 // Get all books
+// const getAllBooks = async (req, res) => {
+//   try {
+//     const books = await Book.find({});
+//     res
+//       .status(HTTP_STATUS.OK)
+//       .json(success("Books retrieved successfully", books));
+//   } catch (error) {
+//     res
+//       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+//       .json(failure("An error occurred while fetching books", error));
+//   }
+// };
+
+// Get all books with search, sort, filter, and pagination
 const getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find({});
+    const {
+      title,
+      author,
+      minPrice,
+      maxPrice,
+      minStock,
+      maxStock,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize,
+    } = req.query;
+
+    // Create a filter object based on query parameters
+    const filter = {};
+    if (title) filter.title = { $regex: title, $options: "i" };
+    if (author) filter.author = { $regex: author, $options: "i" };
+    if (minPrice) filter.price = { $gte: parseFloat(minPrice) };
+    if (maxPrice)
+      filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
+    if (minStock) filter.stock = { $gte: parseInt(minStock) };
+    if (maxStock) filter.stock = { ...filter.stock, $lte: parseInt(maxStock) };
+
+    // Create a sort object based on query parameters
+    const sort = {};
+    if (sortBy) sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+    // Calculate skip and limit for pagination
+    const skip = (page - 1) * pageSize;
+    const limit = parseInt(pageSize);
+
+    // Query the database with the filter, sort, skip, and limit
+    const books = await Book.find(filter).sort(sort).skip(skip).limit(limit);
+
     res
       .status(HTTP_STATUS.OK)
       .json(success("Books retrieved successfully", books));
@@ -60,7 +107,6 @@ const getAllBooks = async (req, res) => {
       .json(failure("An error occurred while fetching books", error));
   }
 };
-
 // Update a book by ID
 const updateBook = async (req, res) => {
   try {

@@ -4,6 +4,9 @@ const cors = require("cors");
 const BookRouter = require("./routes/BookRouter");
 const AuthRouter = require("./routes/AuthRouter");
 const UserRouter = require("./routes/UserRouter");
+const CartRouter = require("./routes/CartRouter");
+const TransactionRouter = require("./routes/TransactionRouter");
+const ReviewRouter = require("./routes/ReviewRouter");
 
 const dotenv = require("dotenv");
 const databaseConnection = require("./database/database");
@@ -18,6 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/books", BookRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
+app.use("/cart", CartRouter);
+app.use("/transaction", TransactionRouter);
+app.use("/review", ReviewRouter);
 
 app.use((req, res) => {
   return res.status(400).send({ message: "Invalid Request" });
