@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const morgan = require("morgan");
+const fs = require("fs");
+const path = require("path");
+
 const BookRouter = require("./routes/BookRouter");
 const AuthRouter = require("./routes/AuthRouter");
 const UserRouter = require("./routes/UserRouter");
@@ -17,6 +21,13 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
+
+// Log file
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "server", "access.log"),
+  { flags: "a" }
+);
+app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use("/books", BookRouter);
 app.use("/auth", AuthRouter);
