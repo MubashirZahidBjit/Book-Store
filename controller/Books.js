@@ -3,6 +3,50 @@ const { success, failure } = require("../util/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 
 // Create a new book
+// const createBook = async (req, res) => {
+//   try {
+//     const {
+//       title,
+//       price,
+//       author,
+//       stock,
+//       description,
+//       discounted_price,
+//       release_date,
+//     } = req.body;
+
+//     // Check if a book with the same title already exists
+//     const existingBook = await Book.findOne({ title });
+//     if (existingBook) {
+//       return res
+//         .status(HTTP_STATUS.BAD_REQUEST)
+//         .json(failure("A book with the same title already exists."));
+//     }
+
+//     // Create a new book instance
+//     const newBook = new Book({
+//       title,
+//       price,
+//       author,
+//       stock,
+//       description,
+//       discounted_price,
+//       release_date,
+//     });
+
+//     // Save the book to the database
+//     await newBook.save();
+
+//     return res
+//       .status(HTTP_STATUS.CREATED)
+//       .json(success("Book created successfully", newBook));
+//   } catch (error) {
+//     return res
+//       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+//       .json(failure("An error occurred while creating the book", error));
+//   }
+// };
+
 const createBook = async (req, res) => {
   try {
     const {
@@ -13,6 +57,8 @@ const createBook = async (req, res) => {
       description,
       discounted_price,
       release_date,
+      discount_start_date,
+      discount_end_date,
     } = req.body;
 
     // Check if a book with the same title already exists
@@ -32,6 +78,8 @@ const createBook = async (req, res) => {
       description,
       discounted_price,
       release_date,
+      discount_start_date,
+      discount_end_date,
     });
 
     // Save the book to the database
@@ -46,20 +94,6 @@ const createBook = async (req, res) => {
       .json(failure("An error occurred while creating the book", error));
   }
 };
-
-// Get all books
-// const getAllBooks = async (req, res) => {
-//   try {
-//     const books = await Book.find({});
-//     res
-//       .status(HTTP_STATUS.OK)
-//       .json(success("Books retrieved successfully", books));
-//   } catch (error) {
-//     res
-//       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-//       .json(failure("An error occurred while fetching books", error));
-//   }
-// };
 
 // Get all books with search, sort, filter, and pagination
 const getAllBooks = async (req, res) => {

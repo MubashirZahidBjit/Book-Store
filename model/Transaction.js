@@ -17,7 +17,7 @@ const transactionSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    balance: {
+    total_price: {
       type: Number,
       required: true,
     },

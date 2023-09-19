@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const Auth = require("../model/Auth");
 const User = require("../model/User");
-// const { validationResult } = require("express-validator");
+const { validationResult } = require("express-validator");
 const { success, failure } = require("../util/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 const jasonwebtoken = require("jsonwebtoken");
@@ -9,6 +9,14 @@ const jasonwebtoken = require("jsonwebtoken");
 class AuthController {
   async signUp(req, res) {
     try {
+      // Check for validation errors
+      const validation = validationResult(req).array();
+      console.log(validation);
+      if (validation.length > 0) {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(failure("Failed to add user", validation));
+      }
       // Extract email and password from request body
       const { name, email, phone, address, role, balance, password } = req.body;
 
@@ -33,7 +41,7 @@ class AuthController {
       //   await result.save();
 
       // Create a new User document and save it in the users collection
-      const newUser = new User({
+      const newUser = await User.create({
         name: name,
         email: email,
         phone: phone,

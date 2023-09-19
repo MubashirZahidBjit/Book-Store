@@ -21,6 +21,8 @@ const bookSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  discount_start_date: { type: Date, required: false },
+  discount_end_date: { type: Date, required: false },
   discounted_price: {
     type: Number,
     default: null,

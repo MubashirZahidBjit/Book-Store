@@ -44,7 +44,59 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Update a user by ID
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json(failure("User not found with the given ID"));
+    }
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json(success("User updated successfully", updatedUser));
+  } catch (error) {
+    res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json(failure("An error occurred while updating the user", error));
+  }
+};
+
+// Delete a user by ID
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Delete the user using findByIdAndRemove
+    const deletedUser = await User.findByIdAndRemove(id);
+
+    if (!deletedUser) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json(failure("User not found with the given ID"));
+    }
+
+    res
+      .status(HTTP_STATUS.OK)
+      .json(success("User deleted successfully", deletedUser));
+  } catch (error) {
+    res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json(failure("An error occurred while deleting the user", error));
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
+  updateUser,
+  deleteUser,
 };
