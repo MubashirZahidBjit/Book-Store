@@ -129,3 +129,8 @@
 ::ffff:127.0.0.1 - - [20/Sep/2023:02:21:00 +0000] "GET /user/api/getAllUsers HTTP/1.1" 200 756 "-" "PostmanRuntime/7.33.0"
 ::ffff:127.0.0.1 - - [20/Sep/2023:02:21:09 +0000] "GET /user/api/getAllUsers HTTP/1.1" 401 49 "-" "PostmanRuntime/7.33.0"
 ::ffff:127.0.0.1 - - [20/Sep/2023:02:24:06 +0000] "GET /user/api/getAllUsers HTTP/1.1" 200 756 "-" "PostmanRuntime/7.33.0"
+::ffff:127.0.0.1 - - [20/Sep/2023:02:38:07 +0000] "PUT /user/api/updateUser/6509b2703130118d42ae112c HTTP/1.1" 401 49 "-" "PostmanRuntime/7.33.0"
+::ffff:127.0.0.1 - - [20/Sep/2023:02:40:04 +0000] "POST /auth/api/logIn HTTP/1.1" 200 334 "-" "PostmanRuntime/7.33.0"
+::ffff:127.0.0.1 - - [20/Sep/2023:02:42:25 +0000] "PUT /user/api/updateUser/6509b2703130118d42ae112c HTTP/1.1" 200 203 "-" "PostmanRuntime/7.33.0"
+::ffff:127.0.0.1 - - [20/Sep/2023:02:43:24 +0000] "PUT /user/api/updateUser/6509b2703130118d42ae112c HTTP/1.1" 401 49 "-" "PostmanRuntime/7.33.0"
+::ffff:127.0.0.1 - - [20/Sep/2023:02:43:25 +0000] "PUT /user/api/updateUser/6509b2703130118d42ae112c HTTP/1.1" 401 49 "-" "PostmanRuntime/7.33.0"

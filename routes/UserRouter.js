@@ -10,7 +10,7 @@ router.post("/api/create", UserController.createUser);
 router.get("/api/getAllUsers", isAdmin, UserController.getAllUsers);
 
 // Update user
-router.put("/api/updateUser/:id", isAdmin, UserController.updateUser);
+router.put("/api/updateUser/:id", UserController.updateUser);
 
 // Delete a User
 router.delete("/api/deleteUser/:id", isAdmin, UserController.deleteUser);
