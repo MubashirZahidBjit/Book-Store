@@ -4,7 +4,7 @@ const CartController = require("../controller/CartController");
 const { isUser } = require("../middleware/authValidation");
 
 // Add a new cart
-router.post("/api/addToCart", isUser, CartController.addToCart);
+router.post("/api/addToCart", CartController.addToCart); //isUser
 
 // Remove from cart
 router.delete("/api/removeFromCart", isUser, CartController.removeFromCart);

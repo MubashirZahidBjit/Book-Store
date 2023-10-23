@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const BookController = require("../controller/Books");
 const { isAdmin } = require("../middleware/authValidation");
+const upload = require("../database/files");
 
 // Create a new book
-router.post("/api/create", isAdmin, BookController.createBook);
+router.post("/api/create", upload.single("image"), BookController.createBook); //isAdmin
 
 // Get all books
 router.get("/api/getAll", BookController.getAllBooks);

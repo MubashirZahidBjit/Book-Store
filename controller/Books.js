@@ -1,6 +1,7 @@
 const Book = require("../model/Books");
 const { success, failure } = require("../util/common");
 const HTTP_STATUS = require("../constants/statusCodes");
+const path = require("path");
 
 // Create a new book
 // const createBook = async (req, res) => {
@@ -68,6 +69,8 @@ const createBook = async (req, res) => {
         .status(HTTP_STATUS.BAD_REQUEST)
         .json(failure("A book with the same title already exists."));
     }
+    console.log("Request file:", req);
+    let image = req.file.path.replace(/\\/g, "/");
 
     // Create a new book instance
     const newBook = new Book({
@@ -80,6 +83,7 @@ const createBook = async (req, res) => {
       release_date,
       discount_start_date,
       discount_end_date,
+      image,
     });
 
     // Save the book to the database
@@ -89,6 +93,7 @@ const createBook = async (req, res) => {
       .status(HTTP_STATUS.CREATED)
       .json(success("Book created successfully", newBook));
   } catch (error) {
+    console.log(error);
     return res
       .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
       .json(failure("An error occurred while creating the book", error));

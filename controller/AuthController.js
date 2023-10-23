@@ -5,6 +5,14 @@ const { validationResult } = require("express-validator");
 const { success, failure } = require("../util/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 const jasonwebtoken = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
+const path = require("path");
+const ejs = require("ejs");
+const transporter = require("../database/mail");
+const { promisify } = require("util");
+const ejsRenderFile = promisify(ejs.renderFile);
+const crypto = require("crypto");
+// const { sendResponse } = require("../util/common");
 
 class AuthController {
   async signUp(req, res) {
@@ -65,6 +73,7 @@ class AuthController {
 
   async logIn(req, res) {
     const { email, password } = req.body;
+    console.log(email, password);
 
     const auth = await Auth.findOne({ email: email });
 
@@ -76,11 +85,14 @@ class AuthController {
     if (!checkPassword) {
       return res.status(HTTP_STATUS.OK).send(failure("Invalid Credentials"));
     }
-
+    const user = await User.findOne({ email: email });
     const responseAuth = auth.toObject();
     delete responseAuth.password;
     delete responseAuth._id;
 
+    // const userId = String(user._id);
+    responseAuth.id = user._id;
+    // console.log(responseAuth.id);
     const jwt = jasonwebtoken.sign(responseAuth, process.env.SECRET_KEY, {
       expiresIn: "1h",
     });
@@ -90,6 +102,149 @@ class AuthController {
     return res
       .status(HTTP_STATUS.OK)
       .send(success("Successfully Logged in", responseAuth));
+  }
+
+  async sendForgotPasswordEmail(req, res) {
+    try {
+      const { recipient } = req.body;
+      if (!recipient || recipient === "") {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(failure("Recipient email is not provided"));
+      }
+
+      const auth = await Auth.findOne({ email: recipient });
+
+      if (!auth) {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(failure("User is not registerd"));
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      auth.resetPasswordToken = resetToken;
+      auth.resetPasswordExpire = Date.now() + 60 * 60 * 1000;
+      auth.resetPassword = true;
+
+      await auth.save();
+
+      const resetURL = path.join(
+        process.env.FRONTEND_URL,
+        "reset-password",
+        resetToken,
+        auth._id.toString()
+      );
+      const htmlBody = await ejsRenderFile(
+        path.join(__dirname, "..", "views", "forgot-password.ejs"),
+        {
+          name: auth.name,
+          resetURL: resetURL,
+        }
+      );
+
+      const result = await transporter.sendMail({
+        from: "zahid-app.com",
+        to: `${auth.name} ${recipient}`,
+        subject: "Forgot Password?",
+        html: htmlBody,
+      });
+
+      if (result.messageId) {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(success("Successfully requesting for resetting password"));
+      }
+      return res.status(HTTP_STATUS.OK).send(failure("Something went wrong"));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        .send(failure("Something went wrong"));
+    }
+  }
+
+  async resetPassword(req, res) {
+    try {
+      const { token, userId, newPassword, confirmPassword } = req.body;
+
+      const auth = await Auth.findOne({
+        _id: new mongoose.Types.ObjectId(userId),
+      });
+      if (!auth) {
+        return res.status(HTTP_STATUS.OK).send(failure("Invalid Request"));
+      }
+
+      if (auth.resetPasswordExpire < Date.now()) {
+        return res.status(HTTP_STATUS.GONE).send(failure("Expire time"));
+      }
+
+      if (auth.resetPasswordToken !== token || auth.resetPassword === false) {
+        return res
+          .status(HTTP_STATUS.UNAUTHORIZED)
+          .send(failure("Invalid Token"));
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(failure("Password do not match"));
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10).then((hash) => {
+        return hash;
+      });
+
+      const result = await Auth.findByIdAndUpdate(
+        { _id: new mongoose.Types.ObjectId(userId) },
+        {
+          password: hashedPassword,
+          resetPassword: false,
+          resetPasswordExpire: null,
+          resetPasswordToken: null,
+        }
+      );
+
+      if (result.isModified) {
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(success("Successfully updated the password"));
+      }
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        .send(failure("Something went wrong"));
+    }
+    // return sendResponse(res, HTTP_STATUS.OK, "Request is still valid");
+  }
+
+  async validatePasswordResetRequest(req, res) {
+    try {
+      const { token, userId } = req.body;
+
+      const auth = await Auth.findOne({
+        _id: new mongoose.Types.ObjectId(userId),
+      });
+      if (!auth) {
+        return sendResponse(res, HTTP_STATUS.NOT_FOUND, "Invalid request");
+      }
+
+      if (auth.resetPasswordExpire < Date.now()) {
+        return sendResponse(res, HTTP_STATUS.GONE, "Expired request");
+      }
+
+      if (auth.resetPasswordToken !== token || auth.resetPassword === false) {
+        return sendResponse(res, HTTP_STATUS.UNAUTHORIZED, "Invalid token");
+      }
+      return sendResponse(res, HTTP_STATUS.OK, "Request is still valid");
+    } catch (error) {
+      console.log(error);
+      return sendResponse(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Something went wrong!"
+      );
+    }
   }
 }
 

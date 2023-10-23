@@ -11,4 +11,6 @@ router.post(
 );
 router.post("/api/logIn", AuthController.logIn);
 
+// router.post("api/forget-password", AuthController.sendForgotPasswordEmail);
+
 module.exports = router;

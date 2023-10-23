@@ -7,12 +7,12 @@ const { isAdmin } = require("../middleware/authValidation");
 router.post("/api/create", UserController.createUser);
 
 // Get all users
-router.get("/api/getAllUsers", isAdmin, UserController.getAllUsers);
+router.get("/api/getAllUsers", UserController.getAllUsers); //isAdmin
 
 // Update user
 router.put("/api/updateUser/:id", UserController.updateUser);
 
 // Delete a User
-router.delete("/api/deleteUser/:id", isAdmin, UserController.deleteUser);
+router.delete("/api/deleteUser/:id", UserController.deleteUser); //isAdmin
 
 module.exports = router;
